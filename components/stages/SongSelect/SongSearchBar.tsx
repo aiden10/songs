@@ -1,0 +1,202 @@
+
+'use client'
+
+import React, { useState, useEffect } from 'react';
+import { getSongs, SongOption, getFullSongData } from "@/shared/utils";
+import { useGameContext } from "@/shared/GameContext";
+
+export default function SongSearchBar() {
+    const { 
+        songs, 
+        setSongs, 
+        submitSong, 
+        playerID, 
+        genreRestriction 
+    } = useGameContext();
+    
+    const [query, setQuery] = useState('');
+    const [options, setOptions] = useState<SongOption[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [selectedSong, setSelectedSong] = useState<SongOption | null>(null);
+    const [disabled, setDisabled] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [error, setError] = useState<string>('');
+
+    // Debounced search
+    useEffect(() => {
+        if (!query.trim()) {
+            setOptions([]);
+            setShowDropdown(false);
+            return;
+        }
+
+        const timeoutId = setTimeout(async () => {
+            setLoading(true);
+            setError('');
+            try {
+                const results = await getSongs(query);
+                setOptions(results);
+                setShowDropdown(results.length > 0);
+            } 
+            catch (err) {
+                setError('Failed to search songs. Please try again.');
+                setOptions([]);
+                setShowDropdown(false);
+            } 
+            finally {
+                setLoading(false);
+            }
+        }, 300); // 300ms debounce
+
+        return () => clearTimeout(timeoutId);
+    }, [query]);
+
+    // Check if player has already submitted a song
+    useEffect(() => {
+        const hasSubmitted = songs.some(song => song.submitterID === playerID);
+        setDisabled(hasSubmitted);
+    }, [songs, playerID]);
+
+    const handleSelectSong = async (option: SongOption) => {
+        setSelectedSong(option);
+        setQuery(`${option.title} - ${option.artist}`);
+        setShowDropdown(false);
+        
+        try {
+            // Get full song data to check genres
+            const fullSong = await getFullSongData(option.id, playerID);
+            
+            // Check if song matches genre restriction
+            if (genreRestriction && !fullSong.genres.some(genre => 
+                genre.toLowerCase().includes(genreRestriction.toLowerCase())
+            )) {
+                setError(`Song must contain "${genreRestriction}" genre. This song has: ${fullSong.genres.join(', ')}`);
+                return;
+            }
+            
+            setError('');
+        } catch (err) {
+            setError('Failed to load song details. Please try another song.');
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!selectedSong) {
+            setError('Please select a song first.');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const fullSong = await getFullSongData(selectedSong.id, playerID);
+            
+            // Double-check genre restriction
+            if (genreRestriction && !fullSong.genres.some(genre => 
+                genre.toLowerCase().includes(genreRestriction.toLowerCase())
+            )) {
+                setError(`Song must contain "${genreRestriction}" genre.`);
+                return;
+            }
+
+            // Submit song
+            setSongs(prev => [...prev, fullSong]);
+            submitSong(fullSong);
+            setDisabled(true);
+            setError('');
+            setQuery('');
+            setSelectedSong(null);
+            
+        } catch (err) {
+            setError('Failed to submit song. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && selectedSong && !disabled && !loading) {
+            e.preventDefault();
+            handleSubmit();
+        }
+    };
+
+    return (
+        <div className="relative w-full max-w-md">
+            {/* Genre restriction notice */}
+            {genreRestriction && (
+                <div className="mb-2 p-2 bg-yellow-100 border border-yellow-300 rounded text-sm text-yellow-800">
+                    Songs must contain <strong>{genreRestriction}</strong> genre
+                </div>
+            )}
+
+            {/* Search input */}
+            <div className="relative">
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Search for a song..."
+                    disabled={disabled}
+                    className={`
+                        w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
+                        ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
+                        ${error ? 'border-red-500' : 'border-gray-300'}
+                    `}
+                />
+                
+                {loading && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                    </div>
+                )}
+            </div>
+
+            {/* Dropdown with search results */}
+            {showDropdown && !disabled && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {options.map((option, index) => (
+                        <button
+                            key={`${option.id}-${index}`}
+                            onClick={() => handleSelectSong(option)}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
+                        >
+                            <div className="font-medium text-gray-900">{option.title}</div>
+                            <div className="text-sm text-gray-600">{option.artist}</div>
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* Error message */}
+            {error && (
+                <div className="mt-2 p-2 bg-red-100 border border-red-300 rounded text-sm text-red-700">
+                    {error}
+                </div>
+            )}
+
+            {/* Submit button */}
+            <button
+                onClick={handleSubmit}
+                disabled={!selectedSong || disabled || loading}
+                className={`
+                    w-full mt-3 px-4 py-2 rounded-lg font-medium transition-colors
+                    ${!selectedSong || disabled || loading
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    }
+                `}
+            >
+                {loading ? 'Loading...' : disabled ? 'Song Submitted' : 'Submit Song'}
+            </button>
+
+            {/* Selected song preview */}
+            {selectedSong && !disabled && (
+                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
+                    <div className="font-medium">Selected: {selectedSong.title}</div>
+                    <div className="text-gray-600">by {selectedSong.artist}</div>
+                </div>
+            )}
+        </div>
+    );
+}

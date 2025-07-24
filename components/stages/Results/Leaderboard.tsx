@@ -1,0 +1,165 @@
+
+import React from 'react';
+import { useGameContext } from '@/shared/GameContext';
+
+const getTrophyIcon = (position: number) => {
+    switch (position) {
+    case 1:
+        return '🏆';
+    case 2:
+        return '🥈';
+    case 3:
+        return '🥉';
+    default:
+        return null;
+    }
+};
+
+const getPositionStyling = (position: number) => {
+    switch (position) {
+        case 1:
+            return 'bg-gradient-to-r from-yellow-100 to-yellow-50 border-yellow-300 text-yellow-900';
+        case 2:
+            return 'bg-gradient-to-r from-gray-100 to-gray-50 border-gray-300 text-gray-900';
+        case 3:
+            return 'bg-gradient-to-r from-orange-100 to-orange-50 border-orange-300 text-orange-900';
+        default:
+            return 'bg-white border-gray-200 text-gray-900';
+    }
+};
+
+interface LeaderboardProps {
+    title?: string;
+    showPositions?: boolean;
+    maxPlayers?: number;
+    compact?: boolean;
+}
+
+export default function Leaderboard({ title = "Leaderboard", showPositions = true, maxPlayers, compact = false }: LeaderboardProps) {
+    const { players, playerID } = useGameContext();
+    
+    const sortedPlayers = [...players].sort((a, b) => {
+        if (a.score !== b.score) {
+            return b.score - a.score;
+        }
+        return a.playerName.localeCompare(b.playerName);
+    });
+
+    // Limit players if maxPlayers is specified
+    const displayPlayers = maxPlayers ? sortedPlayers.slice(0, maxPlayers) : sortedPlayers;
+
+    return (
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4">
+                <h2 className="text-2xl font-bold text-center">{title}</h2>
+                <p className="text-center text-blue-100 text-sm">
+                {players.length} {players.length === 1 ? 'player' : 'players'}
+                </p>
+            </div>
+
+            {/* Player list */}
+            <div className="divide-y divide-gray-200">
+                {displayPlayers.map((player, index) => {
+                    const position = index + 1;
+                    const isCurrentPlayer = player.playerID === playerID;
+                    const trophy = getTrophyIcon(position);
+                    const positionStyling = getPositionStyling(position);
+                
+                    return (
+                        <div
+                            key={player.playerID}
+                            className={`
+                                flex items-center justify-between p-4 transition-all duration-200 hover:shadow-md
+                                ${positionStyling}
+                                ${isCurrentPlayer ? 'ring-2 ring-blue-500 ring-inset' : ''}
+                                ${compact ? 'p-3' : 'p-4'}
+                            `}
+                            >
+                            {/* Left side - Position and name */}
+                            <div className="flex items-center space-x-4">
+                                {/* Position */}
+                                {showPositions && (
+                                <div className="flex items-center justify-center w-8 h-8">
+                                    {trophy ? (
+                                        <span className="text-2xl">{trophy}</span>
+                                    ) : (
+                                        <span className="text-lg font-bold text-gray-500">#{position}</span>
+                                    )}
+                                </div>
+                                )}
+                                
+                                {/* Player info */}
+                            <div>
+                            <div className="flex items-center space-x-2">
+                                <h3 className={`font-semibold ${compact ? 'text-base' : 'text-lg'}`}>
+                                    {player.playerName}
+                                </h3>
+                                {isCurrentPlayer && (
+                                <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                                    You
+                                </span>
+                                )}
+                            </div>
+                            {!compact && position <= 3 && (
+                                <p className="text-sm text-gray-600">
+                                {position === 1 ? 'Champion!' : 
+                                position === 2 ? 'Runner-up' : 
+                                'Third place'}
+                                </p>
+                            )}
+                            </div>
+                    </div>
+
+                    {/* Right side - Score */}
+                    <div className="text-right">
+                            <div className={`font-bold ${compact ? 'text-lg' : 'text-xl'} ${
+                                position === 1 ? 'text-yellow-600' :
+                                position === 2 ? 'text-gray-600' :
+                                position === 3 ? 'text-orange-600' :
+                                'text-gray-800'
+                            }`}>
+                                {player.score}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                                {player.score === 1 ? 'point' : 'points'}
+                            </div>
+                        </div>
+                    </div>
+                );
+                })}
+            </div>
+
+            {/* Footer with additional info */}
+            {maxPlayers && sortedPlayers.length > maxPlayers && (
+                <div className="bg-gray-50 p-3 text-center">
+                    <p className="text-sm text-gray-600">
+                        Showing top {maxPlayers} of {sortedPlayers.length} players
+                    </p>
+                </div>
+            )}
+
+            {/* Current player's position if not in top results */}
+            {maxPlayers && 
+            sortedPlayers.length > maxPlayers && 
+            !displayPlayers.some(p => p.playerID === playerID) && (
+                <div className="bg-blue-50 border-t-2 border-blue-200 p-3">
+                {(() => {
+                    const currentPlayerIndex = sortedPlayers.findIndex(p => p.playerID === playerID);
+                    const currentPlayer = sortedPlayers[currentPlayerIndex];
+                    return currentPlayer ? (
+                    <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium text-blue-800">
+                            Your position: #{currentPlayerIndex + 1}
+                        </span>
+                        <span className="font-bold text-blue-800">
+                            {currentPlayer.score} points
+                        </span>
+                    </div>
+                    ) : null;
+                })()}
+                </div>
+            )}
+        </div>
+    );
+}

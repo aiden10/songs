@@ -8,11 +8,11 @@ export default function PlayerList() {
         if (a.score > b.score) return -1;
         return 0;
     });
-
+    console.log(sortedPlayers);
     return (
         <div className="flex flex-col">
             {sortedPlayers.map((player, index) => (
-                <div key={player.playerID} className="flex flex-row justify-between items-center p-2">
+                <div key={index} className="flex flex-row justify-between items-center p-2">
                     <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-gray-500">#{index + 1}</span>
                         <h2 className="px-3 py-1 text-lg font-medium">{player.playerName}</h2>

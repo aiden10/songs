@@ -155,7 +155,8 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                 "playerID": room.player_index,
                 "host": host,
                 "rounds": room.rounds,
-                "genreRestriction": room.genre_restriction
+                "genreRestriction": room.genre_restriction,
+                "existingPlayers": [{"playerID": p.id, "playerName": p.name, "score": p.score} for p in room.players.values()]
             }
         }))
         
@@ -267,6 +268,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                 
                 # Remove room if empty
                 if len(room.players) == 0:
+                    print("Room closed")
                     rooms.pop(room_id, None)
     
     except Exception as e:

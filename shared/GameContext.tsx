@@ -79,6 +79,13 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         roundsLimit.current = eventData.rounds;
         setHost(eventData.host);
         genreRestriction.current = eventData.genreRestriction;
+        let myPlayer: Player = {
+            playerID: eventData.playerID,
+            playerName: name,
+            score: 0,
+        };
+        setPlayers(prev => [...prev, myPlayer]);
+        setPlayers([myPlayer, ...eventData.existingPlayers]);
     };
 
     const handleOtherJoin = (eventData: SocketEvents['otherJoin']) => {

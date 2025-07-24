@@ -35,6 +35,7 @@ export interface SocketEvents {
         rounds: number;
         genreRestriction: string;
         host: boolean;
+        existingPlayers: Player[];
     };
     otherJoin: {
         playerName: string;

@@ -13,6 +13,7 @@ export default function SongCarousel() {
     return <div className="flex flex-row overflow-x-scroll">
         {songs.map((song, index) => (
             <SongDisplay
+                key={index}
                 song={song}
                 votingEnabled={votingEnabled}
             />

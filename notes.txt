@@ -1,0 +1,806 @@
+
+Allow users to create and join rooms
+Everybody picks a song based on the genre
+After everyone has picked, the songs are played one at a time (10-30s for each song, or user specified time frame)
+Then everyone votes on who they think the song belongs to
+If the song that you picked is correctly attributed to you, then you get x amount of points.
+After n rounds, the winner is decided.
+
+# Requests/Events:
+These are sent from the client or server. They are sent to all clients except the sender.
+{
+    "join": {
+        "playerID": int,
+        "rounds": int,
+        "genreRestriction": str
+        "host": bool,
+    },
+    "otherJoin": { // sent from server when a new player joins the room.
+        "playerName": str,
+        "playerID": int
+    },
+    "quit": { // sent from server when a player leaves the room.
+        "playerID": int
+    },
+    "songSubmitted": { // sent from client to server, then from server to other clients.
+        "name": str,
+        "artist": str,
+        "genres": str[],
+        "cover": str (base64 string),
+        "previewURL": str,
+        "songID": int,
+        "submitterID": int
+    },
+    "vote": { // sent from client to server, then from server to other clients.
+        "songID": int,
+        "voteRecipientID": int,
+        "voterID": int
+    },
+    "updateScores": {
+        "newScores": [{"playerID": int, "newScore": int}]
+    },
+    "updateStage": {
+        "newStage": int
+    },
+    "updateGenreRestriction": {
+        "genreRestriction": str
+    },
+    "restart": { // sent from a client to server, then forwarded to other clients
+        "rounds": int
+    }
+}
+
+# Globals (GameContext):
+    class Player {
+        playerID: number
+        playerName: string;
+        score: number;
+        constructor(playerID: number, playerName: string){
+            this.playerID = playerID;
+            this.playerName = playerName;
+            score = 0;
+        }
+    }
+    
+    export type Song = {
+        songID: int;
+        name: str;
+        artist: str;
+        genres: str[];
+        cover: str;
+        previewURL: str;
+        submitterID: int;
+    }
+
+    type Vote = {
+        voterID: int;
+        voteRecipientID: int;
+        songID: int;
+    }
+
+    export enum Stages {
+        SongSelect, // when players are selecting their songs (initial stage)
+        Voting, // after all players have selected a song
+        Reveal, // after all players have voted (reveal who each song belonged to)
+        Results // after n rounds have passed show who won
+    }
+
+    const [currentRound, setCurrentRound] = useState(0);
+    const [host, setHost] = useState(false);
+    const [stage, setStage] = useState(Stages.SongSelect);
+    const [players, setPlayers] = useState<Player[]>([]);
+    const [songs, setSongs] = useState<Song[]>([]);
+    const [votes, setVotes] = useState<Vote[]>([]);
+    const [playerID, setPlayerID] = useState(0);
+    const [socket, setSocket] = useState(null);
+    const roundsLimit = useRef(0);
+    const genreRestriction = useRef("");
+
+# Client Event Handling:
+onJoin(eventData: Dictionary) {
+    setPlayerID(eventData.playerID);
+    roundsLimit.current = eventData.rounds;
+    setHost(eventData.host);
+    genreRestriction.current = eventData.genreRestriction;
+}
+
+onOtherJoin(eventData: Dictionary) {
+    setPlayers([...players, (new Player(
+        playerID = eventData.PlayerID;
+        playerName = eventData.playerName;
+    ))]);
+}
+
+onQuit(eventData: Dictionary) {
+    setPlayers([players.remove(players.find(player => player.playerID === eventData.playerID))]);
+    setSongs([songs.remove(songs.find(song => song.submitterID === eventData.playerID))]); // remove the song of the player who left
+}
+
+onSongSubmit(eventData: Dictionary) {
+    let newSong: Song = {
+        songID: eventData.songID;
+        name: eventData.name;
+        artist: eventData.artist;
+        genres: eventData.genres;
+        cover: eventData.cover;
+        previewURL: eventData.previewURL;
+        submitterID: eventData.submitterID;
+    };
+    setSongs([...songs, newSong]);
+}
+
+onVote(eventData: Dictionary) {
+    let newVote: Vote = {
+        voterID: eventData.voterID;
+        voteRecipientID: eventData.voteRecipientID;
+        songID: eventData.songID;
+    };
+    setVotes([...votes, newVote]);
+}
+
+onUpdateScores(eventData: Dictionary) {
+    eventData.newScores.forEach((scorePair) => {
+        let targetID = scorePair.playerID;
+        let newScore = scorePair.newScore;
+        let playerIndex = players.findIndex(player => player.playerID === targetID);
+        players[playerIndex].score = newScore;
+    });
+}
+
+onUpdateStage(eventData: Dictionary) {
+    switch (eventData.newStage) {
+        case Stages.SongSelect:
+            setStage(Stages.SongSelect);
+            break;
+        case Stages.Voting:
+            setStage(Stages.Voting);
+            break;
+        case Stages.Reveal:
+            setStage(Stages.Reveal);
+            break;
+        case Stages.Results:
+            setStage(Stages.Results);
+            break;
+        default:
+            break;
+    }
+}
+
+onUpdateGenreRestriction(eventData: Dictionary) {
+    genreRestriction.current = eventData.genreRestriction;
+}
+
+onRestart(eventData: Dictionary) {
+    setVotes([]);
+    setSongs([]);
+    setCurrentRound(0);
+    setStage(Stages.SongSelect);
+    roundsLimit.current = eventData.roundsLimit;
+}
+
+# Events Sent From Client:
+const {socket} = useGameContext();
+function submitSong(song: Song) {
+    socket.send({"type": "submitSong", "data": song});
+}
+
+function submitVote(selectedPlayer: Player, songID: int, voterID: int) {
+    let vote: Vote = {
+        voterID: voterID;
+        voteRecipientID: selectedPlayer.playerID;
+        songID: songID;
+    };
+    setVotes([...votes, vote]); // if this is in GameContext it will have access to setVotes and votes
+    socket.send(
+        {"type": "submitVote", "data": vote}
+    );
+}
+
+function submitRestart(rounds: int) {
+    socket.send({"type": "submitRestart", "data": {"rounds": rounds}});
+}
+
+# Utility Functions:
+async function getFullSongData(id: int, playerID: int) => Song {
+    const res = await fetch(`${SONG_DATA_URL}/${id}`);
+    const data = res.json();
+    let song: Song = {
+        songID: id;
+        name: data.name;
+        artist: data.artist;
+        genres: data.genres;
+        cover: data.cover;
+        preivewURL: data.previewURL;
+        submitterID: playerID;
+    };
+    return song;
+}
+
+function getPlayerData(id: int) => Player {
+    return players.find(player => player.playerID === id);
+}
+
+# Components:
+
+export default function PlayerList() {
+    { players } = useGameContext();
+    return <div className="flex flex-col">
+        players.sort((a, b) => {
+            if (a.score < b.score)
+                return -1;
+            if (a.score > b.score)
+                return 1;
+            return 0;
+        });
+        {players.map((player, index) => {
+            (
+                <div className="flex flex-row">
+                    <h2 className="px-5 py-2">{player.playerName}</h2>
+                    <h1>{player.score}</h1>
+                </div>
+            )
+        })}
+    </div>
+}
+
+export default function GameScreen() {
+    { stage } = useGameContext();
+    return <div>
+        <PlayerList/>
+        {
+            stage === Stages.SongSelect && <SongSelectStage/>
+        }
+        {
+            stage === Stages.Voting && <VotingStage/>
+        }
+        {
+            stage === Stages.Reveal && <RevealStage/>
+        }
+        {
+            stage === Stages.Results && <ResultsStage/>
+        }
+    </div>
+}
+
+// Song Selection Components
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+import CircularProgress from '@mui/material/CircularProgress';
+import {Song} from '@types';
+import { getFullSongData } from '@/utils';
+
+interface SongOption {
+    title: string;
+    artist: string;
+    id: int;
+}
+
+type searchProps = {
+    submitSong: Function;
+    setSongs: Function;
+    setSelectedSong: Function;
+    selectedSong: Song;
+    songs: Song[];
+    playerID: int;
+}
+
+async function getSongs(query: string) => SongOption[] {
+    const res = await fetch(`${SONG_SEARCH_URL}&q=${query}`);
+    const data = res.json();
+    var songs: SongOption[] = [];
+    data.forEach((songData) => {
+        let newSong: Song = {
+            title: songData.title;
+            artist: songData.artist;
+            id: songData.id;
+        };
+        songs.push(newSong);
+    });
+    return songs;
+}
+
+export default function SongSearchBar({submitSong, setSongs, playerID, setSelectedSong, selectedSong}: searchProps) {
+    const {genreRestriction} = useGameContext();
+    const [open, setOpen] = useState(false);
+    const [options, setOptions] = useState<readonly SongOption[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [disabled, setDisabled] = useState(false);
+
+    function handleOpen() {
+        setOpen(true);
+        (async () => {
+            setLoading(true);
+            var songs: SongOption[] = await getSongs(); // how do I use the input here?
+            setOptions(songs);
+            setLoading(false);
+        })();
+    }
+    
+    function handleClose() {
+        setOpen(false);
+        setOptions([]);
+    }
+
+    return (
+        <div>
+            <Autocomplete
+                sx={{ width: 300 }}
+                open={open}
+                onOpen={handleOpen}
+                onClose={handleClose}
+                options={options}
+                onChange={(event, value) => {
+                    let song = getFullSongData(value.id, playerID);
+                    if (song.includes(genreRestriction))
+                        setSelectedSong(song);
+                    else
+                        alert(`Song must have ${genreRestriction} as one of its genres.`);
+                }}
+                onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                        event.defaultMuiPrevented = true;
+                        setSongs([...songs, selectedSong]);
+                        submitSong(selectedSong);
+                        setDisabled(true);
+                    }
+                }}
+                loading={loading}
+                disabled={disabled}
+                renderInput={(params) => (
+                    <TextField
+                    {...params}
+                    label="Asynchronous"
+                    slotProps={{
+                        input: {
+                        ...params.InputProps,
+                        endAdornment: (
+                            <Fragment>
+                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                            </Fragment>
+                        ),
+                        },
+                    }}
+                    />
+                )}
+            />
+            <button
+                onClick={() => {
+                    setSongs([...songs, selectedSong]);
+                    submitSong(selectedSong);
+                    setDisabled(true);
+                }}
+                disabled={disabled}
+            >
+                Submit
+            </button>
+        </div>
+    );
+}
+
+type songDisplayProps = {
+    song: Song;
+    voting: bool;
+}
+export default function SongDisplay({song, voting}: songDisplayProps) {
+    const {players, submitVote, selectedPlayer, setSelectedPlayer, playerID} = useGameContext();
+    return <div className="flex flex-col ">
+        <img className="max-w-64 min-h-64" src={song.cover}/>
+        <h1>{song.name}</h1>
+        <h1>{song.artist}</h1>
+        <h1>{song.genres.join(', ')}</h1>
+        <audio controls src={song.previewURL}"></audio>
+        {voting && 
+            <PlayerSearch
+                players={players}
+                submitVote={submitVote}
+                selectedPlayer={selectedPlayer}
+                setSelectedPlayer={setSelectedPlayer}
+                playerID={playerID}
+                songID={song.songID}
+            />
+        }
+    </div>
+}
+
+type songCarouselProps = {
+    songs: Song[];
+    voting: bool;
+}
+export default function SongCarousel({songs, voting}: songCarouselProps) {
+    return <div className="flex flex-row overflow-x-scroll">
+        {songs.map((song, index) => {
+            <SongDisplay
+                song={song}
+                voting={voting}
+            />
+        })}
+    </div>
+}
+
+export default function SongSelectStage() {
+    const [selectedSong, setSelectedSong] = useState<Song>(null);
+    { songs, setSongs, submitSong, playerID, genreRestriction } = useGameContext();
+    return <div className="flex flex-col">
+        <SongCarousel
+            songs={songs}
+            voting={false}
+        />
+        <SongSearchBar
+            submitSong={submitSong}
+            setSongs={setSongs}
+            setSelectedSong={setSelectedSong}
+            songs={songs}
+            playerID={playerID}
+        />
+        <h1 className="px-5 py-2 bg-red/50">Songs must contain {genreRestriction} genre</h1>
+    </div>
+}
+
+// Voting Stage Components
+
+import { getFullSongData, getPlayerData } from '@/utils';
+type VoteStatusProps = {
+    votes: Vote[];
+}
+
+// shows who you've voted each song for
+export default function VoteStatus({votes}: VoteStatusProps) {
+    return <div className="flex flex-col">
+        {votes.map((vote, index) => {
+            let song = getFullSongData(vote.songID, vote.voterID);
+            let player = getPlayerData(vote.voteRecipientID);
+            <div className="flex flex-row">
+                <div className="flex flex-col">
+                    <img src={song.cover} className="max-w-8 max-h-8"/>
+                    <div className="p-5 bg-black/75 flex flex-col opacity-0 hover:opacity-100 transition-100">
+                        <p>{song.name}</p>
+                        <p>{song.artist}</p>
+                    </div>
+                </div>
+                <p className="text-[24px]">-></p>
+                <p>{player.playerName}</p>
+            </div>
+        })}
+    </div>
+}
+
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+import Vote from '@types'
+
+type PlayerSearchProps = {
+    players: Player[];
+    submitVote: Function;
+    selectedPlayer: Player;
+    setSelectedPlayer: Function;
+    playerID: int;
+    songID: int;
+}
+
+export default function PlayerSearch({players, submitVote, selectedPlayer, setSelectedPlayer, playerID, songID}: PlayerSearchProps) {
+    const [disabled, setDisabled] = useState(false);
+    return (
+        <div>
+            <Autocomplete
+                options={players}
+                sx={{ width: 300 }}
+                disabled={disabled}
+                renderInput={(params) => <TextField {...params} label="Player"/>
+                onChange={(event, value) => {
+                    setSelectedPlayer(value);
+                }}
+                }
+                onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                        event.defaultMuiPrevented = true;
+                        submitVote(selectedPlayer, songID, playerID);
+                        setDisabled(true);
+                    }
+                }}
+            />
+            <button
+                className=""
+                disabled={disabled}
+                onClick={() => {
+                    submitVote(selectedPlayer, songID, playerID);
+                    setDisabled(true);
+                }}
+            >
+                Vote
+            </button>
+        </div>
+    );
+}
+
+export default function VotingStage() {
+    const {songs, votes} = useGameContext();
+    return <div className="flex flex-col">
+        <SongCarousel
+            songs={songs}
+            voting={true}
+        />
+        <VoteStatus
+            votes={votes}
+        />
+    </div>
+}
+
+// Reveal Stage
+
+import {getPlayerData} from '@utils';
+
+type revealProps = {
+    song: Song;
+    votes: Vote[];
+}
+
+export default function Reveal({song, votes}: revealProps) {
+    var songOwner: string = getPlayerData(song.submitterID).playerName;
+    var correctGuessers: string[] = [];
+    votes.forEach((vote) => {
+        if (vote.voteRecipientID === song.submitterID){
+            let playerName = getPlayerData(vote.voterID).playerName;
+            correctGuessers.push(playerName);
+        }
+    });
+    return <div className="flex flex-col">
+        <img src={song.cover} className="min-w-64 min-h-64" />
+        <h1>{song.name} was chosen by... {songOwner}</h1>
+        <div className="">
+            {correctGuessers.map((name, index) => {
+                <p>{name} got it right!</p>
+            })}
+        </div>
+    </div>
+}
+
+import {Song} from '@types';
+export default function RevealStage() {
+    const {songs, setStage, roundsLimit, currentRound, setCurrentRound, setVotes, setSongs} = useGameContext();
+    const [songIndex, setSongIndex] = useState(0);
+    const [currentSong, setCurrentSong] = useState<Song>(songs[songIndex]);
+    const [nextText, setNextText] = useState("Next");
+    function updateCurrentSong() {
+        setCurrentSong(songs[songIndex]);
+    }
+    useEffect(updateCurrentSong, [songIndex]);
+
+    return <div className="flex flex-row">
+        <button
+            className={`${songIndex <= 0? "hidden" : "visible"}`}
+            onClick={() => {
+                setSongIndex(songIndex => songIndex - 1);
+                if (songIndex !== songs.length - 1)
+                    setNextText("Next");
+            }}
+        >
+            Previous
+        </button>
+        <Reveal
+            song={currentSong}
+        />
+        <button
+            onClick={() => {
+                    if (songIndex === songs.length - 1) {
+                        setNextText("Continue");
+                    }
+                    if (nextText === "Continue") {
+                        if (currentRound >= roundsLimit){
+                            setStage(Stages.Results);
+                        }
+                        else{
+                            setCurrentRound(currentRound => currentRound + 1);
+                            setSongs([]);
+                            setVotes([]);
+                            setStage(Stages.SongSelect);
+                        }
+                            
+                        return;
+                    }
+                    setSongIndex(songIndex => songIndex + 1);
+            }}
+        >
+            {nextText}
+        </button>
+    </div>
+}
+
+// Results Stage
+
+export default function ResultsStage() {
+    const {host, submitRestart, players} = useGameContext();
+    const [newRounds, setNewRounds] = useState(1);
+    return <div className="flex flex-col">
+        <div className={`flex flex-row ${host? "visible" : "invisible"}`}
+            <button
+                onClick={() => submitRestart(newRounds)}
+            >
+                New Game
+            </button>
+            <p>Rounds to play:</p>
+            <input 
+                type="number"
+                defaultValue={1}
+                min="1" 
+                onChange={(e) => setNewRounds(e.target.value)}
+            />
+        </div>
+    </div>
+}
+
+# Server
+
+from pydantic import BaseModel 
+
+GENRES = []
+
+class CreateRoomBody(BaseModel):
+    rounds: int
+
+class PlayerInfo(BaseModel):
+    name: str
+
+class Player:
+    def __init__(self, name: str, id: int, socket: WebSocket):
+        self.name = name
+        self.id = id
+        self.score = 0
+        self.socket = socket
+        self.voted = False
+        self.submitted_song = False
+
+class Room:
+    def __init__(self, id: int, rounds: int):
+        self.id = id
+        self.rounds = rounds
+        self.song_submissions = []
+        self.votes = []
+        self.genre_restriction = random.choice(GENRES)
+        self.player_index = 0
+        self.players = {}
+
+CORRECT_GUESS_REWARD = 5
+CORRECT_GUESS_RECIPIENT_REWARD = 10
+rooms_index = 0
+rooms = {}
+
+async def broadcast(data: dict, room: Room, sender=None):
+    for player in room.players.values():
+        if player.socket != sender:
+            await socket.send_json(data)
+
+def all_songs_submitted(room: Room) -> bool:
+    for player in room.players.values():
+        if not player.submitted_song:
+            return False
+    return True
+
+def all_votes_submitted(room: Room) -> bool:
+    for player in room.players.values():
+        if not player.voted:
+            return False
+    return True
+
+def clear_songs(room: Room):
+    for player in room.players.values():
+        player.submitted_song = False
+    room.song_submissions = []
+
+def clear_votes(room: Room):
+    for player in room.players.values():
+        player.voted = False
+    room.votes = []
+
+def get_album_info(album_id: int):
+    response = requests.get(f"https://api.deezer.com/album/{album_id}")
+    album_data = json.loads(response.text)
+    genres = [genre["name"] for genre in album_data["genres"]["data"]]
+    return album_data["cover_big"], genres
+
+def calculate_scores(room: Room) -> list[dict]:
+    new_scores = []
+    for vote in room.votes:
+        voter = vote["voterID"]
+        vote_recipient = vote["voteRecipientID"]
+        for song in room.song_submissions:
+            if song["submitterID"] == vote_recipient:
+                room.players[voter].score += CORRECT_GUESS_REWARD
+                room.players[vote_recipient].score += CORRECT_GUESS_RECIPIENT_REWARD
+    
+    for player in room.players.values():
+        new_scores.append({"playerID": player.id, "newScore": player.score})
+    
+    return new_scores
+
+@app.websocket("/ws/")
+async def socket_loop(websocket: WebSocket, id: str):
+    await websocket.accept()
+    player = None
+    room = None
+    try:
+        while True:
+            if id in rooms:
+                room = rooms[id]
+            if not player:
+                player_info: PlayerInfo = await websocket.receive_json()
+                player = Player(player_info.name, room.player_index, websocket)
+                
+                host = False
+                if len(room.players) == 0: host = True
+
+                await websocket.send_json({"type": "join", "playerID": player_index, "host": host, "rounds": room.rounds, "genreRestriction": room.genre_restriction})
+                await broadcast({"type": "otherJoin", "playerName": player_info.name, "playerID": room.player_index}, room, websocket)
+                
+                room.players.update({player_index: player})
+                room.player_index += 1
+
+            request_data = await websocket.receive_json()        
+            match request_data["type"]: 
+                case "submitSong":
+                    song_data = request_data["data"]
+                    player_id = song_data["submitterID"]
+                    room.players[player_id].submitted_song = True
+                    await broadcast("type": "songSubmitted", "data": song_data, room)
+                    room.song_submissions.append(song_data)
+                    if all_songs_submitted():
+                        await broadcast({"type": "updateStage", "newStage": 1})
+                    break
+
+                case "submitVote":
+                    vote_data = request_data["data"]
+                    player_id = vote_data["voterID"]
+                    room.players[player_id].voted = True
+                    await broadcast({"type": "vote", "data": vote_data}, room)
+                    room.votes.append(vote_data)
+                    if all_votes_submitted():
+                        new_scores = calculate_scores(room)
+                        await broadcast({"type": "updateScores", "newScores": new_scores}, room)
+                        room.genre_restriction = random.choice(GENRES)
+                        await broadcast({"type": "updateStage", "newStage": 2}, room)
+                        await broadcast({"type": "updateGenreRestriction", "genreRestriction": room.genre_restriction})
+                        clear_votes(room)
+                        clear_songs(room)
+                    break
+                
+                case "submitRestart":
+                    restart_data = request_data["data"]
+                    await broadcast("type": "restart", "rounds": restart_data["rounds"])
+                    break
+            
+            except WebSocketDisconnect:
+                room.players.pop(player.id)
+                await broadcast("type": "quit", "playerID": player.id)
+                if len(room.players) < 1:
+                    rooms.pop(room.id)
+
+@app.post("/rooms/create")
+async def create_room(body: CreateRoomBody):
+    rooms.update(rooms_index: Room(rooms_index, body.rounds))
+    rooms_index += 1
+    return JSONResponse(content={"room_id": rooms_index}, status_code=200)
+
+@app.get("/songs/{song_id}")
+async def get_song_data(song_id: int):
+    response = requests.get(f"https://api.deezer.com/track/{song_id}")
+    song_data = json.loads(response.text)
+    artists = ', '.join(artist["name"] for artist in song_data["contributors"])
+    album_id = song_data["album"]["id"]
+    cover, genres = get_album_info(album_id)
+    return {
+        "name": song_data["title"],
+        "artist": artists
+        "genres": genres
+        "cover": cover
+        "previewURL": song_data["preview"]
+    }
+
+To create a room:
+    send request to create room endpoint
+    get room_id from response
+    go to game/{room_id}
+    
+    the game/{room_id} page will call the websocket endpoint in useEffect
+
+- room creation and join page
+    - name text input on this page

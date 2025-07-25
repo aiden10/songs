@@ -9,51 +9,71 @@ import SongReveal from "./SongReveal";
 export default function RevealStage() {
     const { songs, currentRound, roundsLimit, setStage, setSongs, setVotes, setCurrentRound } = useGameContext();
     const [songIndex, setSongIndex] = useState(0);
-    const [currentSong, setCurrentSong] = useState<Song>(songs[songIndex]);
+    const [currentSong, setCurrentSong] = useState<Song | null>(null);
     const [nextText, setNextText] = useState("Next");
 
-    function updateCurrentSong() {
-        setCurrentSong(songs[songIndex]);
-    }
-    
-    useEffect(updateCurrentSong, [songIndex]);
+    useEffect(() => {
+        setSongIndex(0);
+        setNextText("Next");
+    }, [songs.length]);
 
-    return <div className="flex flex-row">
-        <button
-            className={`${songIndex <= 0? "hidden" : "visible"}`}
-            onClick={() => {
-                setSongIndex(songIndex => songIndex - 1);
-                if (songIndex !== songs.length - 1)
-                    setNextText("Next");
-            }}
-        >
-            Previous
-        </button>
-        <SongReveal
-            song={currentSong}
-        />
-        <button
-            onClick={() => {
-                    if (songIndex === songs.length - 2) {
-                        setNextText("Continue");
-                    }
+    useEffect(() => {
+        if (songs.length > 0 && songIndex >= 0 && songIndex < songs.length) {
+            setCurrentSong(songs[songIndex]);
+        } else {
+            setCurrentSong(null);
+        }
+    }, [songIndex, songs]);
+
+
+    useEffect(() => {
+        if (songs.length > 0 && songIndex === songs.length - 1) {
+            setNextText("Continue");
+        } else {
+            setNextText("Next");
+        }
+    }, [songIndex, songs.length]);
+
+
+    if (songs.length === 0 || !currentSong) {
+        return <div>Loading songs...</div>;
+    }
+
+    return (
+        <div className="flex flex-row">
+            <button
+                className={`${songIndex <= 0 ? "hidden" : "visible"}`}
+                onClick={() => {
+                    setSongIndex(prev => Math.max(0, prev - 1));
+                }}
+            >
+                Previous
+            </button>
+            
+            <SongReveal song={currentSong} />
+            
+            <button
+                onClick={() => {
                     if (nextText === "Continue") {
-                        if (currentRound >= roundsLimit){
+
+                        if (currentRound >= roundsLimit) {
                             setStage(Stages.Results);
-                        }
-                        else {
-                            setCurrentRound(currentRound => currentRound + 1);
+                        } else {
+
+                            setCurrentRound(prev => prev + 1);
                             setSongs([]);
                             setVotes([]);
                             setStage(Stages.SongSelect);
                         }
-                            
                         return;
                     }
-                    setSongIndex(songIndex => songIndex + 1);
-            }}
-        >
-            {nextText}
-        </button>
-    </div>
+                    
+
+                    setSongIndex(prev => Math.min(songs.length - 1, prev + 1));
+                }}
+            >
+                {nextText}
+            </button>
+        </div>
+    );
 }

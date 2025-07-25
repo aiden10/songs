@@ -154,6 +154,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         setVotes([]);
         setSongs([]);
         setCurrentRound(0);
+        players.forEach(p => p.score = 0);
         setStage(Stages.SongSelect);
         roundsLimit.current = eventData.rounds;
     };

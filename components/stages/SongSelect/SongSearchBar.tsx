@@ -21,6 +21,7 @@ export default function SongSearchBar() {
     const [disabled, setDisabled] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [error, setError] = useState<string>('');
+    
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {

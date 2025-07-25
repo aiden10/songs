@@ -3,6 +3,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from enum import Enum
 import json
 import random
 
@@ -21,9 +22,16 @@ app.add_middleware(
 )
 
 # Constants
-GENRES = ["rock", "pop", "jazz", "classical", "hip hop", "electronic", "country", "r&b", "dance"]
+GENRES = ["rock", "pop", "alternative", "classical", "hip hop", "country", "r&b", "asian music", "film"]
+# electro, techno/house, dance, films/games, film scores
 CORRECT_GUESS_REWARD = 5
 CORRECT_GUESS_RECIPIENT_REWARD = 10
+
+class Stages(Enum):
+    SongSelect = 0
+    Voting = 1
+    Reveal = 2
+    Results = 3
 
 class CreateRoomBody(BaseModel):
     rounds: int
@@ -197,7 +205,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                         if all_songs_submitted(room):
                             await broadcast({
                                 "type": "updateStage",
-                                "data": {"newStage": 1}
+                                "data": {"newStage": Stages.Voting.value}
                             }, room)
 
                 case "submitVote":
@@ -226,7 +234,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                             # Move to reveal stage
                             await broadcast({
                                 "type": "updateStage",
-                                "data": {"newStage": 2}
+                                "data": {"newStage": Stages.Reveal.value}
                             }, room)
                             
                             # Update genre for next round
@@ -235,6 +243,8 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                                 "type": "updateGenreRestriction",
                                 "data": {"genreRestriction": room.genre_restriction}
                             }, room)
+                            clear_songs(room)
+                            clear_votes(room)
 
                 case "submitRestart":
                     restart_data = message["data"]
@@ -252,7 +262,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                     await broadcast({
                         "type": "restart",
                         "data": {"rounds": restart_data["rounds"]}
-                    }, room, websocket)
+                    }, room)
 
     except WebSocketDisconnect:
         if player and room:

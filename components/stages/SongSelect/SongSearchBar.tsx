@@ -1,7 +1,7 @@
 
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getSongs, SongOption, getFullSongData } from "@/shared/utils";
 import { useGameContext } from "@/shared/GameContext";
 
@@ -21,8 +21,8 @@ export default function SongSearchBar() {
     const [disabled, setDisabled] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [error, setError] = useState<string>('');
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Debounced search
     useEffect(() => {
         if (!query.trim()) {
             setOptions([]);
@@ -57,6 +57,19 @@ export default function SongSearchBar() {
         setDisabled(hasSubmitted);
     }, [songs, playerID]);
 
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setShowDropdown(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     const handleSelectSong = async (option: SongOption) => {
         setSelectedSong(option);
         setQuery(`${option.title} - ${option.artist}`);
@@ -81,6 +94,7 @@ export default function SongSearchBar() {
     };
 
     const handleSubmit = async () => {
+        setShowDropdown(false);
         if (!selectedSong) {
             setError('Please select a song first.');
             return;
@@ -106,9 +120,11 @@ export default function SongSearchBar() {
             setQuery('');
             setSelectedSong(null);
             
-        } catch (err) {
+        } 
+        catch (err) {
             setError('Failed to submit song. Please try again.');
-        } finally {
+        } 
+        finally {
             setLoading(false);
         }
     };
@@ -154,7 +170,7 @@ export default function SongSearchBar() {
 
             {/* Dropdown with search results */}
             {showDropdown && !disabled && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div ref={dropdownRef} className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                     {options.map((option, index) => (
                         <button
                             key={`${option.id}-${index}`}

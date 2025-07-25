@@ -8,7 +8,7 @@ export default function PlayerList() {
         if (a.score > b.score) return -1;
         return 0;
     });
-    console.log(sortedPlayers);
+
     return (
         <div className="flex flex-col">
             {sortedPlayers.map((player, index) => (

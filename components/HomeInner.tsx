@@ -7,22 +7,12 @@ import { useRouter } from 'next/navigation';
 import { createRoom } from '@/shared/utils';
 
 export default function HomeInner() {
-    const { name, roomID, setRoomID, setName } = useGameContext();
+    const { roomID, setRoomID } = useGameContext();
     const [rounds, setRounds] = useState(3);
     const router = useRouter();
 
     return <div className='flex flex-col place-items-center w-screen h-screen'>
-        <h1 
-            className='text-white text-[84px] mt-30 pb-20 animate-bounce'
-            style={{animationDuration: '10s'}}>my song</h1>
-        <input
-            type="text"
-            className='input'
-            onChange={(e) => setName(e.currentTarget.value)}
-            defaultValue={name}
-            maxLength={35}
-        />
-        <h1 className='text-[64px] absolute left-0 top-0 m-5'>name: {name}</h1>
+        <h1 className=' text-[84px] mt-30 pb-20 '>songs</h1>
         <div className='flex-row flex place-items-center'>
             <input 
                 type="number" 
@@ -33,7 +23,7 @@ export default function HomeInner() {
                 min={3}
                 defaultValue={rounds}
             />
-            <button className='btn m-5 px-25 py-5 min-w-75'
+            <button className='btn m-5 px-25 py-5 min-w-75 hover:cursor-pointer'
                 onClick={async () => {
                     let id = (await createRoom(rounds)).room_id;
                     setRoomID(Number(id));
@@ -52,7 +42,7 @@ export default function HomeInner() {
                 onInput={(e) => {setRoomID(Number(e.currentTarget.value))}}
             />
             <button 
-                className='btn m-5 px-25 py-5 min-w-75'
+                className='btn m-5 px-25 py-5 min-w-75 hover:cursor-pointer'
                 disabled={roomID === -1}
                 onClick={() => {router.push(`/game/${roomID}`);}}>
                 Join Room

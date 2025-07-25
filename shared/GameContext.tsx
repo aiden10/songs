@@ -149,7 +149,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     const handleUpdateGenreRestriction = (eventData: SocketEvents['updateGenreRestriction']) => {
         genreRestriction.current = eventData.genreRestriction;
     };
-
+    
     const handleRestart = (eventData: SocketEvents['restart']) => {
         setVotes([]);
         setSongs([]);
@@ -205,7 +205,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         };
     }, [socket]);
 
-    // Action functions
     const submitSong = (song: Song) => {
         if (socket) {
             socket.send(JSON.stringify({

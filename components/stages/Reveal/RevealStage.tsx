@@ -34,7 +34,7 @@ export default function RevealStage() {
         />
         <button
             onClick={() => {
-                    if (songIndex === songs.length - 1) {
+                    if (songIndex === songs.length - 2) {
                         setNextText("Continue");
                     }
                     if (nextText === "Continue") {

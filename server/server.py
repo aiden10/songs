@@ -21,7 +21,7 @@ app.add_middleware(
 )
 
 # Constants
-GENRES = ["rock", "pop", "jazz", "classical", "hip-hop", "electronic", "country", "r&b", "dance"]
+GENRES = ["rock", "pop", "jazz", "classical", "hip hop", "electronic", "country", "r&b", "dance"]
 CORRECT_GUESS_REWARD = 5
 CORRECT_GUESS_RECIPIENT_REWARD = 10
 
@@ -74,7 +74,7 @@ def all_songs_submitted(room: Room) -> bool:
 def all_votes_submitted(room: Room) -> bool:
     """Check if all players have voted for everyone"""
     for player in room.players.values():
-        if len(player.votes) < len(room.players):
+        if len(player.votes) < len(room.players) - 1:
             return False
     return True
 
@@ -178,7 +178,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
             request_data = await websocket.receive_text()
             message = json.loads(request_data)
             
-            match message["type"]:
+            match message["type"]:                
                 case "submitSong":
                     song_data = message["data"]
                     player_id = song_data["submitterID"]
@@ -205,7 +205,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                     player_id = vote_data["voterID"]
                     
                     if player_id in room.players:
-                        room.players[player_id].voted = True
+                        room.players[player_id].votes.append(vote_data)
                         room.votes.append(vote_data)
                         
                         # Broadcast to other players
@@ -270,6 +270,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                 if len(room.players) == 0:
                     print("Room closed")
                     rooms.pop(room_id, None)
+            print(f"players: {len(room.players.values())}")
     
     except Exception as e:
         print(f"WebSocket error: {e}")

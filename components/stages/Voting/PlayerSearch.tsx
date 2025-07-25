@@ -12,7 +12,8 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
         players, 
         submitVote, 
         playerID,
-        votes 
+        votes,
+        songs
     } = useGameContext();
     
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -31,7 +32,11 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
         const hasVoted = votes.some(vote => 
             vote.voterID === playerID && vote.songID === songID
         );
-        setDisabled(hasVoted);
+        const submittedSong = songs.find(s => s.submitterID === playerID);
+        if (submittedSong)
+            setDisabled(submittedSong.songID === songID || hasVoted)
+        else
+            setDisabled(hasVoted);
     }, [votes, playerID, songID]);
 
     const handleSelectPlayer = (player: Player) => {

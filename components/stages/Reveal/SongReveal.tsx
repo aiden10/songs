@@ -35,13 +35,13 @@ export default function SongReveal({ song }: SongRevealProps) {
     }
 
     return (
-        <div className="flex flex-col items-center p-6 bg-lime-300 rounded-md border-4 md:min-w-auto min-w-full">
+        <div className="flex flex-col items-center p-4 bg-lime-300 rounded-md border-4 w-full max-w-xl overflow-y-auto">
             {/* Song cover and info */}
-            <div className="relative mb-4">
+            <div className="relative mb-4 items-center">
                 <img 
                     src={song.cover} 
                     alt={`${song.name} cover`}
-                    className="w-64 h-64 object-cover rounded-lg shadow-md" 
+                    className="w-48 sm:w-64 h-48 sm:h-64 object-cover rounded-sm mx-auto" 
                 />
                 
                 {/* Audio preview */}

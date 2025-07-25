@@ -102,7 +102,7 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
                 
                 {/* Selected indicator */}
                 {selectedPlayer && !disabled && (
-                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     </div>
                 )}

@@ -53,7 +53,7 @@ export default function VoteStatus() {
     
     if (myVotes.length === 0) {
         return (
-            <div className="flex flex-col p-8 text-yellow-400 bg-amber-50 border-4 border-yellow-400 md:max-w-1/2 justify-center items-center">
+            <div className="flex flex-col p-4 text-yellow-400 bg-amber-50 border-4 border-yellow-400 md:max-w-1/2 justify-center items-center">
                 <p className="text-lg">No votes cast yet</p>
                 <p className="text-sm font-bold">Vote for songs to see your choices here</p>
             </div>
@@ -61,7 +61,7 @@ export default function VoteStatus() {
     }
     
     return (
-        <div className="flex flex-col space-y-2 md:max-w-1/2">
+        <div className="flex flex-col space-y-2 md:max-w-1/2 items-center">
             <h3 className="text-[28px] font-semibold text-black mb-3">Your Votes</h3>
             {myVotes.map((vote, index) => (
                 <VoteItem key={`${vote.songID}-${vote.voteRecipientID}-${index}`} vote={vote} />

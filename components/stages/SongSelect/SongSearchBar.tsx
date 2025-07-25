@@ -177,7 +177,9 @@ export default function SongSearchBar() {
 
             {/* Dropdown with search results */}
             {showDropdown && !disabled && (
-                <div ref={dropdownRef} className="absolute z-10 w-full bg-lime-300 border-4 border-black rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div ref={dropdownRef} className="absolute z-10 w-full max-h-60 overflow-y-auto
+                bg-lime-300 border-4 border-black rounded-lg shadow-lg
+                    scrollbar-thin scrollbar-thumb-lime-300 scrollbar-track-amber-100">
                     {options.map((option, index) => (
                         <button
                             key={`${option.id}-${index}`}

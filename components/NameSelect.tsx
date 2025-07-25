@@ -21,6 +21,11 @@ export default function NameSelect() {
         }
     }, [paramID, setRoomID]);
 
+    useEffect(() => {
+        if (!name) return;
+        setTempName(prev => (prev === "" ? name : prev));
+    }, [name]);
+    
     const { isConnected } = useWebSocket(
         hasJoined ? roomID.toString() : "", 
         hasJoined ? tempName : ""
@@ -40,13 +45,13 @@ export default function NameSelect() {
                         className='bg-lime-300 p-2 hover:opacity-85 text-white text-[24px]
                          place-self-center text-shadow-[0_0.9px_0.9px_rgba(0,0,0,0.7)] 
                          border-4 rounded-md focus:outline-none focus:border-white border-black'
-                        defaultValue={name}
-                        onInput={(e) => setTempName(e.currentTarget.value)}
-                        minLength={1}
+                        value={tempName}
+                        onChange={(e) => setTempName(e.currentTarget.value)}
                     />
                     <button
                         className="btn m-5 px-25 py-3 min-w-75 hover:cursor-pointer text-shadow-[0_0.9px_0.9px_rgba(0,0,0,0.7)]
              hover:opacity-75 bg-lime-300 rounded-md text-white md:text-[24px] text-[20px] border-4 border-black"
+                        disabled={!tempName.trim()}
                         onClick={() => {
                             setName(tempName);
                             setHasJoined(true);

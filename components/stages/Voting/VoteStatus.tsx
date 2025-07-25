@@ -4,6 +4,7 @@
 import React from 'react';
 import { useGameContext } from '@/shared/GameContext';
 import { Vote } from '@/shared/types';
+import Image from 'next/image';
 
 function VoteItem({ vote }: { vote: Vote }) {
     const { songs, getPlayerData } = useGameContext();
@@ -24,9 +25,11 @@ function VoteItem({ vote }: { vote: Vote }) {
     return (
         <div className="flex flex-row items-center p-2 bg-lime-300 rounded-lg shadow-sm border-4">
             <div className="relative group">
-                <img 
-                    src={song.cover} 
+                <Image
+                    src={song.cover}
                     alt={`${song.name} cover`}
+                    width={32}
+                    height={32}
                     className="w-8 h-8 rounded object-cover"
                 />
                 {/* Tooltip on hover */}

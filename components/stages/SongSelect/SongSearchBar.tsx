@@ -40,6 +40,7 @@ export default function SongSearchBar() {
                 setShowDropdown(results.length > 0);
             } 
             catch (err) {
+                console.error(err);
                 setError('Failed to search songs. Please try again.');
                 setOptions([]);
                 setShowDropdown(false);
@@ -95,6 +96,7 @@ export default function SongSearchBar() {
             setError('');
         } 
         catch (err) {
+            console.error(err);
             setError('Failed to load song details. Please try another song.');
         }
     };
@@ -125,9 +127,9 @@ export default function SongSearchBar() {
             setError('');
             setQuery('');
             setSelectedSong(null);
-            
         } 
         catch (err) {
+            console.error(err);
             setError('Failed to submit song. Please try again.');
         } 
         finally {

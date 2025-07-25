@@ -34,7 +34,7 @@ export default function HomeInner() {
                     className='bg-lime-300 hover:opacity-75 rounded-md text-white text-lg md:text-xl border-4 border-black
                      px-6 py-3 w-full transition-opacity hover:cursor-pointer text-shadow-[0_0.9px_0.9px_rgba(0,0,0,0.7)]'
                     onClick={async () => {
-                        let id = (await createRoom(rounds)).room_id;
+                        const id = (await createRoom(rounds)).room_id;
                         setRoomID(Number(id));
                         console.log(`ROOM ID: ${id}`);
                         router.push(`/game/${id}`)

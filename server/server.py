@@ -320,3 +320,6 @@ async def create_room(body: CreateRoomBody):
         status_code=200
     )
 
+@app.get("/rooms")
+async def get_rooms():
+    return {"rooms": rooms}

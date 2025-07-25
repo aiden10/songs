@@ -15,19 +15,6 @@ const getTrophyIcon = (position: number) => {
     }
 };
 
-const getPositionStyling = (position: number) => {
-    switch (position) {
-        case 1:
-            return 'bg-gradient-to-r from-yellow-100 to-yellow-50 border-yellow-300 text-yellow-900';
-        case 2:
-            return 'bg-gradient-to-r from-gray-100 to-gray-50 border-gray-300 text-gray-900';
-        case 3:
-            return 'bg-gradient-to-r from-orange-100 to-orange-50 border-orange-300 text-orange-900';
-        default:
-            return 'bg-white border-gray-200 text-gray-900';
-    }
-};
-
 interface LeaderboardProps {
     title?: string;
     showPositions?: boolean;

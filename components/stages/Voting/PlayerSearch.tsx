@@ -37,7 +37,7 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
             setDisabled(submittedSong.songID === songID || hasVoted)
         else
             setDisabled(hasVoted);
-    }, [votes, playerID, songID]);
+    }, [votes, playerID, songID, songs]);
 
     const handleSelectPlayer = (player: Player) => {
         setSelectedPlayer(player);

@@ -1,6 +1,8 @@
+
 import { CORRECT_GUESS_RECIPIENT_REWARD, CORRECT_GUESS_REWARD } from "@/shared/constants";
 import { useGameContext } from "@/shared/GameContext";
 import { Song } from "@/shared/types";
+import Image from "next/image";
 
 interface SongRevealProps {
     song: Song;
@@ -38,12 +40,13 @@ export default function SongReveal({ song }: SongRevealProps) {
         <div className="flex flex-col items-center p-4 bg-lime-300 rounded-md border-4 w-full max-w-xl overflow-y-auto">
             {/* Song cover and info */}
             <div className="relative mb-4 items-center">
-                <img 
-                    src={song.cover} 
+                <Image
+                    src={song.cover}
                     alt={`${song.name} cover`}
-                    className="w-48 sm:w-64 h-48 sm:h-64 object-cover rounded-sm mx-auto" 
-                />
-                
+                    width={256}
+                    height={256}
+                    className="w-48 sm:w-64 h-48 sm:h-64 object-cover rounded-sm mx-auto"
+                />                
                 {/* Audio preview */}
                 {song.previewURL && (
                     <div className="mt-3 rounded-md">
@@ -79,7 +82,7 @@ export default function SongReveal({ song }: SongRevealProps) {
                         🎉 Correct Guesses ({correctGuessers.length})
                     </h3>
                     <div className="bg-amber-50 rounded-sm p-3 border-4 border-black">
-                        {correctGuessers.map((player, index) => (
+                        {correctGuessers.map((player) => (
                             <div key={player!.playerID} className="flex items-center justify-between py-1">
                                 <span className="font-medium text-black">{player!.playerName}</span>
                                 <span className="text-sm text-lime-500">+{CORRECT_GUESS_REWARD} pts</span>

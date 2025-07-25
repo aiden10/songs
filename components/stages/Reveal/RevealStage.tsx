@@ -1,7 +1,7 @@
 
 'use client'
 
-import { Song, Stages } from "@/shared/types";
+import { Song } from "@/shared/types";
 import { useGameContext } from "@/shared/GameContext"
 import { useState, useEffect } from "react";
 import SongReveal from "./SongReveal";

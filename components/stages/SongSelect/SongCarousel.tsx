@@ -8,7 +8,7 @@ import SongDisplay from "./SongDisplay";
 export default function SongCarousel() {
     
     const { songs, stage } = useGameContext();
-    var votingEnabled = stage === Stages.Voting;
+    const votingEnabled = stage === Stages.Voting;
 
     return (
         <div className="flex flex-row overflow-x-auto gap-3 sm:gap-6 lg:gap-10 px-2

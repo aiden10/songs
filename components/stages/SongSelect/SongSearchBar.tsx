@@ -73,13 +73,17 @@ export default function SongSearchBar() {
 
     const handleSelectSong = async (option: SongOption) => {
         setSelectedSong(option);
-        setQuery(`${option.title} - ${option.artist}`);
+        setQuery('');
         setShowDropdown(false);
         
         try {
             // Get full song data to check genres
             const fullSong = await getFullSongData(option.id, playerID);
-            
+            const alreadySubmitted = songs.some(s => s.songID === fullSong.songID);
+            if (alreadySubmitted) {
+                setError(`${fullSong.name} has already been submitted`);
+                return;
+            }
             // Check if song matches genre restriction
             if (genreRestriction && !fullSong.genres.some(genre => 
                 genre.toLowerCase().includes(genreRestriction.toLowerCase())
@@ -89,7 +93,8 @@ export default function SongSearchBar() {
             }
             
             setError('');
-        } catch (err) {
+        } 
+        catch (err) {
             setError('Failed to load song details. Please try another song.');
         }
     };

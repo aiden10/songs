@@ -33,6 +33,7 @@ interface GameContextType {
     // Actions
     submitSong: (song: Song) => void;
     submitVote: (selectedPlayer: Player, songID: number, voterID: number) => void;
+    submitDoneReveal: () => void;
     submitRestart: (rounds: number) => void;
 
     // Utility
@@ -56,7 +57,7 @@ interface GameProviderProps {
 export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     const [roomID, setRoomID] = useState(-1);
     const [name, setName] = useState("");
-    const [currentRound, setCurrentRound] = useState(0);
+    const [currentRound, setCurrentRound] = useState(1);
     const [host, setHost] = useState(false);
     const [stage, setStage] = useState<Stages>(Stages.SongSelect);
     const [players, setPlayers] = useState<Player[]>([]);
@@ -223,11 +224,20 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     };
         
         setVotes(prev => [...prev, vote]);
-        
+
         if (socket) {
             socket.send(JSON.stringify({
                 type: 'submitVote',
                 data: vote
+            }));
+        }
+    };
+    
+    const submitDoneReveal = () => {
+        if (socket) {
+            socket.send(JSON.stringify({
+                type: 'submitDoneReveal',
+                data: {"playerID": playerID}
             }));
         }
     };
@@ -240,6 +250,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
             }));
         }
     };
+
 
     // Utility functions
     const getPlayerData = (id: number): Player | undefined => {
@@ -271,6 +282,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         genreRestriction: genreRestriction.current,
         submitSong,
         submitVote,
+        submitDoneReveal,
         submitRestart,
         getPlayerData
     };

@@ -7,10 +7,11 @@ import { useState, useEffect } from "react";
 import SongReveal from "./SongReveal";
 
 export default function RevealStage() {
-    const { songs, currentRound, roundsLimit, setStage, setSongs, setVotes, setCurrentRound } = useGameContext();
+    const { songs, setSongs, setVotes, setCurrentRound, submitDoneReveal } = useGameContext();
     const [songIndex, setSongIndex] = useState(0);
     const [currentSong, setCurrentSong] = useState<Song | null>(null);
     const [nextText, setNextText] = useState("Next");
+    const [waiting, setWaiting] = useState(false);
 
     useEffect(() => {
         setSongIndex(0);
@@ -35,6 +36,13 @@ export default function RevealStage() {
     }, [songIndex, songs.length]);
 
 
+    if (waiting) {
+        return (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-white">
+            <h1 className="text-xl animate-pulse">Waiting for other players...</h1>
+            </div>
+        );
+    }
     if (songs.length === 0 || !currentSong) {
         return <div>Loading songs...</div>;
     }
@@ -56,19 +64,13 @@ export default function RevealStage() {
                 onClick={() => {
                     if (nextText === "Continue") {
 
-                        if (currentRound >= roundsLimit) {
-                            setStage(Stages.Results);
-                        } else {
-
-                            setCurrentRound(prev => prev + 1);
-                            setSongs([]);
-                            setVotes([]);
-                            setStage(Stages.SongSelect);
-                        }
+                        setCurrentRound(prev => prev + 1);
+                        setSongs([]);
+                        setVotes([]);
+                        submitDoneReveal();
+                        setWaiting(true);
                         return;
-                    }
-                    
-
+                    } 
                     setSongIndex(prev => Math.min(songs.length - 1, prev + 1));
                 }}
             >

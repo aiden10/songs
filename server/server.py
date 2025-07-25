@@ -22,8 +22,8 @@ app.add_middleware(
 )
 
 # Constants
-GENRES = ["rock", "pop", "alternative", "classical", "hip hop", "country", "r&b", "asian music", "film"]
-# electro, techno/house, dance, films/games, film scores
+GENRES = ["rock", "pop", "alternative", "classical", "hip hop", "country", "r&b", "film"]
+# electro, techno/house, dance, films/games, film scores, asian music
 CORRECT_GUESS_REWARD = 5
 CORRECT_GUESS_RECIPIENT_REWARD = 10
 
@@ -47,6 +47,7 @@ class Player:
         self.socket = socket
         self.votes = []
         self.submitted_song = False
+        self.done_reveal = False
 
 class Room:
     def __init__(self, id: str, rounds: int):
@@ -57,7 +58,7 @@ class Room:
         self.genre_restriction = random.choice(GENRES)
         self.player_index = 0
         self.players = {}
-        self.current_round = 0
+        self.current_round = 1
 
 # Global state
 rooms_index = 0
@@ -86,6 +87,14 @@ def all_votes_submitted(room: Room) -> bool:
             return False
     return True
 
+def all_players_done_reveal(room: Room) -> bool:
+    for player in room.players.values():
+        if not player.done_reveal:
+            return False
+    for player in room.players.values():
+        player.done_reveal = False
+    return True
+    
 def clear_songs(room: Room):
     """Reset song submission status for new round"""
     for player in room.players.values():
@@ -245,6 +254,19 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                             }, room)
                             clear_songs(room)
                             clear_votes(room)
+                            room.current_round += 1
+
+                case "submitDoneReveal":
+                    reveal_data = message["data"]
+                    player_id = reveal_data["playerID"]
+                    room.players[player_id].done_reveal = True
+                    if all_players_done_reveal(room):
+                        stage = Stages.SongSelect.value
+                        if room.current_round >= room.rounds: stage = Stages.Results.value
+                        await broadcast({
+                            "type": "updateStage",
+                            "data": {"newStage": stage}
+                        }, room)
 
                 case "submitRestart":
                     restart_data = message["data"]

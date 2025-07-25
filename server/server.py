@@ -22,8 +22,8 @@ app.add_middleware(
 )
 
 # Constants
-GENRES = ["rock", "pop", "alternative", "classical", "hip hop", "country", "r&b", "film"]
-# electro, techno/house, dance, films/games, film scores, asian music
+GENRES = ["rock", "pop", "alternative", "hip hop", "r&b", "film"]
+# electro, techno/house, dance, films/games, film scores, asian music, classical, country
 CORRECT_GUESS_REWARD = 5
 CORRECT_GUESS_RECIPIENT_REWARD = 10
 

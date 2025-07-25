@@ -22,7 +22,7 @@ function VoteItem({ vote }: { vote: Vote }) {
     }
     
     return (
-        <div className="flex flex-row items-center p-2 bg-white rounded-lg shadow-sm border">
+        <div className="flex flex-row items-center p-2 bg-lime-300 rounded-lg shadow-sm border-4">
             <div className="relative group">
                 <img 
                     src={song.cover} 
@@ -36,11 +36,11 @@ function VoteItem({ vote }: { vote: Vote }) {
                 </div>
             </div>
             
-            <span className="text-2xl mx-3 text-gray-400">→</span>
+            <span className="text-2xl mx-3 text-black">→</span>
             
             <div className="flex items-center">
-                <span className="font-medium text-gray-800">{player.playerName}</span>
-                <span className="ml-2 text-sm text-gray-500">({player.score} pts)</span>
+                <span className="text-black font-semibold">{player.playerName}</span>
+                <span className="ml-2 text-sm text-white font-bold">({player.score} pts)</span>
             </div>
         </div>
     );
@@ -53,16 +53,16 @@ export default function VoteStatus() {
     
     if (myVotes.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+            <div className="flex flex-col p-8 text-yellow-400 bg-amber-50 border-4 border-yellow-400 md:max-w-1/2 justify-center items-center">
                 <p className="text-lg">No votes cast yet</p>
-                <p className="text-sm">Vote for songs to see your choices here</p>
+                <p className="text-sm font-bold">Vote for songs to see your choices here</p>
             </div>
         );
     }
     
     return (
-        <div className="flex flex-col space-y-2">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Your Votes</h3>
+        <div className="flex flex-col space-y-2 md:max-w-1/2">
+            <h3 className="text-[28px] font-semibold text-black mb-3">Your Votes</h3>
             {myVotes.map((vote, index) => (
                 <VoteItem key={`${vote.songID}-${vote.voteRecipientID}-${index}`} vote={vote} />
             ))}

@@ -38,8 +38,8 @@ export default function RevealStage() {
 
     if (waiting) {
         return (
-            <div className="absolute inset-0 z-50 flex items-center justify-center bg-white">
-            <h1 className="text-xl animate-pulse">Waiting for other players...</h1>
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-amber-100">
+            <h1 className="text-[42px] animate-pulse">Waiting for other players...</h1>
             </div>
         );
     }
@@ -48,9 +48,10 @@ export default function RevealStage() {
     }
 
     return (
-        <div className="flex flex-row">
+        <div className="flex flex-row gap-x-10 items-start justify-center p-5">
             <button
-                className={`${songIndex <= 0 ? "hidden" : "visible"}`}
+                className={`${songIndex <= 0 ? "hidden" : "visible"} bg-lime-300 
+                text-[24] border-4 px-3 hover:cursor-pointer hover:opacity-75`}
                 onClick={() => {
                     setSongIndex(prev => Math.max(0, prev - 1));
                 }}
@@ -61,6 +62,7 @@ export default function RevealStage() {
             <SongReveal song={currentSong} />
             
             <button
+                className="bg-lime-300 border-4 px-3 hover:cursor-pointer hover:opacity-75 text-[24]"
                 onClick={() => {
                     if (nextText === "Continue") {
 

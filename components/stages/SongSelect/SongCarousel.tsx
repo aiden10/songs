@@ -10,7 +10,7 @@ export default function SongCarousel() {
     const { songs, stage } = useGameContext();
     var votingEnabled = stage === Stages.Voting;
 
-    return <div className="flex flex-row overflow-x-scroll">
+    return <div className="flex flex-row overflow-x-scroll gap-x-10">
         {songs.map((song, index) => (
             <SongDisplay
                 key={index}

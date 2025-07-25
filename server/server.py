@@ -262,7 +262,7 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                     room.players[player_id].done_reveal = True
                     if all_players_done_reveal(room):
                         stage = Stages.SongSelect.value
-                        if room.current_round >= room.rounds: stage = Stages.Results.value
+                        if room.current_round > room.rounds: stage = Stages.Results.value
                         await broadcast({
                             "type": "updateStage",
                             "data": {"newStage": stage}

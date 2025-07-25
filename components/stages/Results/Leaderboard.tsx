@@ -49,11 +49,11 @@ export default function Leaderboard({ title = "Leaderboard", showPositions = tru
     const displayPlayers = maxPlayers ? sortedPlayers.slice(0, maxPlayers) : sortedPlayers;
 
     return (
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-white rounded-md overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4">
+            <div className="bg-lime-300 border-4 border-black text-white p-4">
                 <h2 className="text-2xl font-bold text-center">{title}</h2>
-                <p className="text-center text-blue-100 text-sm">
+                <p className="text-center text-white font-bold text-sm">
                 {players.length} {players.length === 1 ? 'player' : 'players'}
                 </p>
             </div>
@@ -64,15 +64,13 @@ export default function Leaderboard({ title = "Leaderboard", showPositions = tru
                     const position = index + 1;
                     const isCurrentPlayer = player.playerID === playerID;
                     const trophy = getTrophyIcon(position);
-                    const positionStyling = getPositionStyling(position);
                 
                     return (
                         <div
                             key={player.playerID}
                             className={`
-                                flex items-center justify-between p-4 transition-all duration-200 hover:shadow-md
-                                ${positionStyling}
-                                ${isCurrentPlayer ? 'ring-2 ring-blue-500 ring-inset' : ''}
+                                flex items-center justify-between p-4 transition-all duration-200 hover:shadow-md bg-amber-50
+                                ${isCurrentPlayer ? 'ring-2 ring-lime-300 ring-inset' : ''}
                                 ${compact ? 'p-3' : 'p-4'}
                             `}
                             >
@@ -96,7 +94,7 @@ export default function Leaderboard({ title = "Leaderboard", showPositions = tru
                                     {player.playerName}
                                 </h3>
                                 {isCurrentPlayer && (
-                                <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                                <span className="bg-lime-300 text-white text-xs px-2 py-1 rounded-full">
                                     You
                                 </span>
                                 )}

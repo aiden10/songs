@@ -13,13 +13,15 @@ export default function GameScreen() {
 
 return <div>
         <NameSelect/>
-        <PlayerList/>
-        <div className="">
-            Round {currentRound} of {roundsLimit}
+        <div className="bg-amber-100 absolute inset-0 p-4 gap-y-5 flex-col flex">
+            <p className="text-[28px] text-black/50 font-bold ml-2">
+                round {currentRound} of {roundsLimit}
+            </p>
+            { stage !== Stages.Results && <PlayerList/>}
+            { stage === Stages.SongSelect && <SongSelectStage/> }
+            { stage === Stages.Voting && <VotingStage/> }
+            { stage === Stages.Reveal && <RevealStage/> }
+            { stage === Stages.Results && <ResultsStage/> }
         </div>
-        { stage === Stages.SongSelect && <SongSelectStage/> }
-        { stage === Stages.Voting && <VotingStage/> }
-        { stage === Stages.Reveal && <RevealStage/> }
-        { stage === Stages.Results && <ResultsStage/> }
     </div>
 }

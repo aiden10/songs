@@ -32,24 +32,28 @@ export default function NameSelect() {
 
     if (!hasJoined) {
         return (
-            <div className={`absolute inset-0 bg-slate-800 z-10 ${visible}`}>
+            <div className={`absolute inset-0 bg-amber-100 z-10 ${visible}`}>
                 <div className="flex flex-col justify-center place-items-center min-h-screen space-y-10 text-white z-15">
-                    <h1>Enter a name:</h1>
+                    <h1 className='text-[48px] text-lime-300 drop-shadow-[0_0.9px_0.9px_rgba(0,0,0,0.7)]'>enter a name</h1>
                     <input 
-                        type="text" 
-                        defaultValue={tempName}
+                        type="text"
+                        className='bg-lime-300 p-2 hover:opacity-85 text-white text-[24px]
+                         place-self-center text-shadow-[0_0.9px_0.9px_rgba(0,0,0,0.7)] 
+                         border-4 rounded-md focus:outline-none focus:border-white border-black'
+                        defaultValue={name}
                         onInput={(e) => setTempName(e.currentTarget.value)}
                         minLength={1}
                     />
                     <button
-                        className="hover:cursor-pointer"
+                        className="btn m-5 px-25 py-3 min-w-75 hover:cursor-pointer text-shadow-[0_0.9px_0.9px_rgba(0,0,0,0.7)]
+             hover:opacity-75 bg-lime-300 rounded-md text-white md:text-[24px] text-[20px] border-4 border-black"
                         onClick={() => {
                             setName(tempName);
                             setHasJoined(true);
                             setVisible("collapse");
                         }}
                     >
-                        Join
+                        join
                     </button>
                 </div>
             </div>

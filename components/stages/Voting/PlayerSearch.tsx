@@ -94,9 +94,9 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
                     placeholder="Who chose this song?"
                     disabled={disabled}
                     className={`
-                        w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500
-                        ${disabled ? 'bg-gray-100 cursor-not-allowed text-gray-500' : 'bg-white'}
-                        ${selectedPlayer ? 'border-green-500' : 'border-gray-300'}
+                        w-full px-3 py-2 text-sm border-4 rounded-md focus:outline-none  
+                        ${disabled ? 'bg-lime-100 cursor-not-allowed text-black/50' : 'bg-lime-200'}
+                        ${selectedPlayer ? 'border-black' : 'border-black/25'}
                     `}
                 />
                 
@@ -110,19 +110,19 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
 
             {/* Dropdown with player options */}
             {showDropdown && !disabled && filteredPlayers.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                <div className="absolute z-10 w-full mt-1 bg-lime-200 border-4 border-black rounded-md shadow-lg max-h-40 overflow-y-auto">
                     {filteredPlayers.map((player) => (
                         <button
                             key={player.playerID}
                             onClick={() => handleSelectPlayer(player)}
                             className={`
-                                w-full px-3 py-2 text-left text-sm hover:bg-blue-50 focus:bg-blue-50 focus:outline-none
-                                ${selectedPlayer?.playerID === player.playerID ? 'bg-blue-100' : ''}
+                                w-full px-3 py-2 text-left text-sm hover:bg-lime-100 focus:outline-none
+                                ${selectedPlayer?.playerID === player.playerID ? 'bg-lime-200' : ''}
                             `}
                         >
                             <div className="flex items-center justify-between">
-                                <span className="font-medium">{player.playerName}</span>
-                                <span className="text-xs text-gray-500">{player.score} pts</span>
+                                <span className="font-medium ">{player.playerName}</span>
+                                <span className="text-xs ">{player.score} pts</span>
                             </div>
                         </button>
                     ))}
@@ -131,8 +131,8 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
 
             {/* No players message */}
             {showDropdown && !disabled && filteredPlayers.length === 0 && query && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-2">
-                    <div className="text-sm text-gray-500 text-center">No players found</div>
+                <div className="absolute z-10 w-full mt-1 bg-lime-200 border-4 border-black rounded-md shadow-lg p-2">
+                    <div className="text-sm text-center">No players found</div>
                 </div>
             )}
 
@@ -141,10 +141,10 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
                 onClick={handleSubmitVote}
                 disabled={!selectedPlayer || disabled}
                 className={`
-                    w-full mt-2 px-3 py-2 text-sm font-medium rounded-md transition-colors
+                    w-full mt-2 px-3 py-2 text-sm font-medium rounded-md transition-colors border-4
                     ${!selectedPlayer || disabled
-                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        : 'bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        ? 'bg-lime-200 text-black/50 cursor-not-allowed border-black/25'
+                        : 'bg-lime-500 text-white hover:bg-lime-500/50 focus:outline-none hover:cursor-pointer border-black'
                     }
                 `}
             >
@@ -153,7 +153,7 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
 
             {/* Vote confirmation */}
             {disabled && (
-                <div className="mt-1 text-xs text-green-600 text-center">
+                <div className="mt-1 text-xs text-white font-semibold text-center">
                     ✓ Voted for {selectedPlayer?.playerName || 'player'}
                 </div>
             )}

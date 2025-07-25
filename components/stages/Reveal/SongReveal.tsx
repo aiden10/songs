@@ -28,14 +28,14 @@ export default function SongReveal({ song }: SongRevealProps) {
 
     if (!songOwner) {
         return (
-            <div className="flex flex-col items-center p-6 bg-gray-100 rounded-lg">
-                <p className="text-gray-600">Song data not available</p>
+            <div className="flex flex-col items-center p-6 bg-gray-300 rounded-lg">
+                <p className="text-black">Song data not available</p>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-lg max-w-md mx-auto">
+        <div className="flex flex-col items-center p-6 bg-lime-300 rounded-md border-4 md:min-w-auto min-w-full">
             {/* Song cover and info */}
             <div className="relative mb-4">
                 <img 
@@ -46,7 +46,7 @@ export default function SongReveal({ song }: SongRevealProps) {
                 
                 {/* Audio preview */}
                 {song.previewURL && (
-                    <div className="mt-3">
+                    <div className="mt-3 rounded-md">
                         <audio 
                             controls 
                             src={song.previewURL}
@@ -59,15 +59,15 @@ export default function SongReveal({ song }: SongRevealProps) {
             </div>
 
             {/* Song details */}
-            <div className="text-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900 mb-1">{song.name}</h2>
-                <p className="text-lg text-gray-600 mb-2">{song.artist}</p>
-                <p className="text-sm text-gray-500">{song.genres.join(', ')}</p>
+            <div className="text-center mb-4 border-4 bg-amber-50 p-3">
+                <h2 className="text-white font-semibold bg-black/50 px-5 border-4 border-black rounded-xs my-1">title: {song.name}</h2>
+                <p className="text-white font-semibold bg-black/50 px-5 border-4 border-black rounded-xs my-1">artist: {song.artist}</p>
+                <p className="text-white font-semibold bg-black/50 px-5 border-4 border-black rounded-xs my-1">genres: {song.genres.join(', ')}</p>
             </div>
 
             {/* Reveal */}
             <div className="text-center mb-6">
-                <h1 className="text-2xl font-bold text-blue-600 mb-4">
+                <h1 className="text-2xl font-bold text-black mb-4 border-4 border-black p-3 bg-amber-50">
                     This song was chosen by... <span className="text-green-600">{songOwner.playerName}!</span>
                 </h1>
             </div>
@@ -75,14 +75,14 @@ export default function SongReveal({ song }: SongRevealProps) {
             {/* Correct guesses */}
             {correctGuessers.length > 0 && (
                 <div className="w-full mb-4">
-                    <h3 className="text-lg font-semibold text-green-600 mb-2 text-center">
+                    <h3 className="text-lg font-semibold text-black mb-2 text-center">
                         🎉 Correct Guesses ({correctGuessers.length})
                     </h3>
-                    <div className="bg-green-50 rounded-lg p-3">
+                    <div className="bg-amber-50 rounded-sm p-3 border-4 border-black">
                         {correctGuessers.map((player, index) => (
                             <div key={player!.playerID} className="flex items-center justify-between py-1">
-                                <span className="font-medium text-green-800">{player!.playerName}</span>
-                                <span className="text-sm text-green-600">+{CORRECT_GUESS_REWARD} pts</span>
+                                <span className="font-medium text-black">{player!.playerName}</span>
+                                <span className="text-sm text-lime-500">+{CORRECT_GUESS_REWARD} pts</span>
                             </div>
                         ))}
                     </div>
@@ -99,7 +99,7 @@ export default function SongReveal({ song }: SongRevealProps) {
                         {incorrectGuessers.map((guess, index) => (
                             <div key={`${guess.voter!.playerID}-${index}`} className="py-1 text-sm text-red-700">
                                 <span className="font-medium">{guess.voter!.playerName}</span>
-                                <span className="text-gray-600"> guessed </span>
+                                <span className="text-black"> guessed </span>
                                 <span className="font-medium">{guess.guessedPlayer!.playerName}</span>
                             </div>
                         ))}
@@ -108,11 +108,11 @@ export default function SongReveal({ song }: SongRevealProps) {
             )}
 
             {/* Score summary */}
-            <div className="w-full bg-blue-50 rounded-lg p-3 mt-2">
+            <div className="w-full bg-amber-50 rounded-sm border-4 border-black p-3 mt-2">
                 <div className="text-center">
-                    <p className="text-sm text-blue-700">
+                    <p className="text-sm text-black/50">
                         <span className="font-medium">{songOwner.playerName}</span> earned 
-                        <span className="font-bold text-blue-800"> +{correctGuessers.length * CORRECT_GUESS_RECIPIENT_REWARD} points</span> 
+                        <span className="font-bold text-lime-400/80"> +{correctGuessers.length * CORRECT_GUESS_RECIPIENT_REWARD} points</span> 
                         {correctGuessers.length === 1 ? ' (1 correct guess)' : ` (${correctGuessers.length} correct guesses)`}
                     </p>
                 </div>

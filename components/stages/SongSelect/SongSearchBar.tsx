@@ -72,7 +72,6 @@ export default function SongSearchBar() {
     }, []);
 
     const handleSelectSong = async (option: SongOption) => {
-        setSelectedSong(option);
         setQuery('');
         setShowDropdown(false);
         
@@ -91,7 +90,8 @@ export default function SongSearchBar() {
                 setError(`Song must contain "${genreRestriction}" genre. This song has: ${fullSong.genres.join(', ')}`);
                 return;
             }
-            
+
+            setSelectedSong(option);
             setError('');
         } 
         catch (err) {
@@ -146,8 +146,8 @@ export default function SongSearchBar() {
         <div className="relative w-full max-w-md">
             {/* Genre restriction notice */}
             {genreRestriction && (
-                <div className="mb-2 p-2 bg-yellow-100 border border-yellow-300 rounded text-sm text-yellow-800">
-                    Songs must contain <strong>{genreRestriction}</strong> genre
+                <div className="mb-2 p-2 bg-amber-50 border-4 border-yellow-400 rounded md:text-[24px] text-yellow-400">
+                    songs must contain genre: <strong>{genreRestriction}</strong>
                 </div>
             )}
 
@@ -158,33 +158,34 @@ export default function SongSearchBar() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Search for a song..."
+                    placeholder="search for a song..."
                     disabled={disabled}
                     className={`
-                        w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500
-                        ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}
-                        ${error ? 'border-red-500' : 'border-gray-300'}
+                        w-full px-4 py-2 border-4 rounded-md focus:outline-none focus:border-white
+                         font-semibold md:text-[32px]
+                        ${disabled ? 'bg-gray-100 cursor-not-allowed text-black/25 border-black/25' : 'bg-lime-300 text-white'}
+                        ${error ? 'border-red-500' : 'border-black'}
                     `}
                 />
                 
                 {loading && (
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     </div>
                 )}
             </div>
 
             {/* Dropdown with search results */}
             {showDropdown && !disabled && (
-                <div ref={dropdownRef} className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                <div ref={dropdownRef} className="absolute z-10 w-full bg-lime-300 border-4 border-black rounded-lg shadow-lg max-h-60 overflow-y-auto">
                     {options.map((option, index) => (
                         <button
                             key={`${option.id}-${index}`}
                             onClick={() => handleSelectSong(option)}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
+                            className="w-full px-4 py-2 text-left hover:bg-lime-200 focus:bg-gray-100 focus:outline-none border-2 border-black last:border-b-0"
                         >
-                            <div className="font-medium text-gray-900">{option.title}</div>
-                            <div className="text-sm text-gray-600">{option.artist}</div>
+                            <div className="font-bold text-white">{option.title}</div>
+                            <div className="text-sm font-semibold text-white">{option.artist}</div>
                         </button>
                     ))}
                 </div>
@@ -192,7 +193,7 @@ export default function SongSearchBar() {
 
             {/* Error message */}
             {error && (
-                <div className="mt-2 p-2 bg-red-100 border border-red-300 rounded text-sm text-red-700">
+                <div className="mt-2 p-2 bg-red-100 border-4 border-red-500 rounded text-sm text-red-700">
                     {error}
                 </div>
             )}
@@ -202,10 +203,10 @@ export default function SongSearchBar() {
                 onClick={handleSubmit}
                 disabled={!selectedSong || disabled || loading}
                 className={`
-                    w-full mt-3 px-4 py-2 rounded-lg font-medium transition-colors
+                    w-full mt-3 px-4 py-2 rounded-sm transition-colors border-4 font-semibold
                     ${!selectedSong || disabled || loading
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        ? 'bg-lime-200/80 text-black/50 cursor-not-allowed border-black/50'
+                        : 'bg-lime-300 text-black hover:bg-lime-300/75 focus:outline-none border-black hover:cursor-pointer'
                     }
                 `}
             >
@@ -214,9 +215,9 @@ export default function SongSearchBar() {
 
             {/* Selected song preview */}
             {selectedSong && !disabled && (
-                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-                    <div className="font-medium">Selected: {selectedSong.title}</div>
-                    <div className="text-gray-600">by {selectedSong.artist}</div>
+                <div className="mt-2 p-2 bg-amber-50 border-4 border-yellow-400 rounded text-sm">
+                    <div className="font-semibold text-black">Selected: {selectedSong.title}</div>
+                    <div className="text-black">by {selectedSong.artist}</div>
                 </div>
             )}
         </div>

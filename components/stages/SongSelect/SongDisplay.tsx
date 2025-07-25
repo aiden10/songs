@@ -21,7 +21,7 @@ export default function SongDisplay({song, votingEnabled}: {song: Song, votingEn
             <h1 className="text-white font-semibold bg-black/50 px-3 border-2 border-black rounded-xs text-center">title: {song.name}</h1>
             <h1 className="text-white font-semibold bg-black/50 px-3 border-2 border-black rounded-xs text-center">artist: {song.artist}</h1>
             <h1 className="text-white font-semibold bg-black/50 px-3 border-2 border-black rounded-xs text-center">genres: {song.genres.join(', ')}</h1>
-            <audio controls src={song.previewURL} className="rounded-md border-2 border-black w-full"></audio>
+            <audio controls src={song.previewURL} className="rounded-md border-2 border-black w-full min-h-[24px]"></audio>
             {
                 votingEnabled &&
                 <PlayerSearch songID={song.songID} />

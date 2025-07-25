@@ -11,7 +11,7 @@ export default function HomeInner() {
     
     return (
         <div className='flex flex-col items-center justify-center w-screen h-screen bg-amber-100 gap-8'>
-            <h1 className='text-6xl md:text-7xl text-lime-300 mb-8 drop-shadow-[0_0.5px_0.5px_rgba(0,0,0,0.7)] font-semibold'>songs</h1>
+            <h1 className='text-6xl md:text-7xl text-lime-400 mb-8 drop-shadow-[0_1.5px_1.5px_rgba(0,0,0,0.3)] font-semibold'>songuesser</h1>
             
             {/* Create Room Section */}
             <div className='flex flex-col items-center gap-4 w-full max-w-2xl px-4'>

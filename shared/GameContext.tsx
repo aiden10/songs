@@ -154,7 +154,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     const handleRestart = (eventData: SocketEvents['restart']) => {
         setVotes([]);
         setSongs([]);
-        setCurrentRound(0);
+        setCurrentRound(1);
         players.forEach(p => p.score = 0);
         setStage(Stages.SongSelect);
         roundsLimit.current = eventData.rounds;

@@ -65,7 +65,6 @@ export default function RevealStage() {
                 className="bg-lime-300 border-4 px-3 hover:cursor-pointer hover:opacity-75 text-[24px]"
                 onClick={() => {
                     if (nextText === "Continue") {
-
                         setCurrentRound(prev => prev + 1);
                         setSongs([]);
                         setVotes([]);

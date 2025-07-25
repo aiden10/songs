@@ -14,9 +14,8 @@ export default function GameScreen() {
 return <div>
         <NameSelect/>
         <div className="bg-amber-100 min-h-screen w-full p-4 gap-y-5 flex flex-col">
-            <p className="text-[28px] text-black/50 font-bold ml-2 sm:absolute sm:right-5">
-                round {currentRound} of {roundsLimit}
-            </p>
+            {stage !== Stages.Results && <p className="text-[28px] text-black/50 font-bold ml-2 sm:absolute sm:right-5">
+                    round {currentRound} of {roundsLimit} </p> }
             { stage !== Stages.Results && <PlayerList/>}
             { stage === Stages.SongSelect && <SongSelectStage/> }
             { stage === Stages.Voting && <VotingStage/> }

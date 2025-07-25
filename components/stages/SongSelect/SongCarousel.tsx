@@ -11,14 +11,14 @@ export default function SongCarousel() {
     const votingEnabled = stage === Stages.Voting;
 
     return (
-        <div className="flex flex-row overflow-x-auto gap-3 sm:gap-6 lg:gap-10 px-2
-                       scrollbar-thin scrollbar-thumb-lime-300 scrollbar-track-amber-100">
+        <div className="flex flex-row overflow-x-scroll max-w-full gap-x-2 items-stretch">
             {songs.map((song, index) => (
-                <SongDisplay
-                    key={index}
-                    song={song}
-                    votingEnabled={votingEnabled}
-                />
+                <div key={index} className="flex-shrink-0">
+                    <SongDisplay
+                        song={song}
+                        votingEnabled={votingEnabled}
+                    />
+                </div>
             ))}
         </div>
     )

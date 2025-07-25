@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useGameContext } from "@/shared/GameContext";
 import { Player } from "@/shared/types";
@@ -20,6 +19,7 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
     const [query, setQuery] = useState('');
     const [showDropdown, setShowDropdown] = useState(false);
     const [disabled, setDisabled] = useState(false);
+    const [isOwnSong, setIsOwnSong] = useState(false);
 
     const filteredPlayers = players
         .filter(player => player.playerID !== playerID) // Can't vote for yourself
@@ -27,16 +27,16 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
             player.playerName.toLowerCase().includes(query.toLowerCase())
         );
 
-    // Check if player has already voted for this song
+    // Check if player has already voted for this song or if it's their own song
     useEffect(() => {
         const hasVoted = votes.some(vote => 
             vote.voterID === playerID && vote.songID === songID
         );
         const submittedSong = songs.find(s => s.submitterID === playerID);
-        if (submittedSong)
-            setDisabled(submittedSong.songID === songID || hasVoted)
-        else
-            setDisabled(hasVoted);
+        const isPlayersSong = submittedSong?.songID === songID;
+        
+        setIsOwnSong(isPlayersSong);
+        setDisabled(isPlayersSong || hasVoted);
     }, [votes, playerID, songID, songs]);
 
     const handleSelectPlayer = (player: Player) => {
@@ -78,6 +78,17 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
     const handleBlur = () => {
         // Delay hiding dropdown to allow for clicks
         setTimeout(() => setShowDropdown(false), 150);
+    };
+
+    const getButtonText = () => {
+        if (isOwnSong) return "Your Song";
+        if (disabled) return "Vote Submitted";
+        return "Vote";
+    };
+
+    const getConfirmationText = () => {
+        if (isOwnSong) return "This is your song";
+        return `✓ Voted for ${selectedPlayer?.playerName || 'player'}`;
     };
 
     return (
@@ -148,13 +159,13 @@ export default function PlayerSearch({ songID }: PlayerSearchProps) {
                     }
                 `}
             >
-                {disabled ? 'Vote Submitted' : 'Vote'}
+                {getButtonText()}
             </button>
 
             {/* Vote confirmation */}
             {disabled && (
                 <div className="mt-1 text-xs text-white font-semibold text-center">
-                    ✓ Voted for {selectedPlayer?.playerName || 'player'}
+                    {getConfirmationText()}
                 </div>
             )}
         </div>

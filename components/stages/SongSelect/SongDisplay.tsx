@@ -8,7 +8,7 @@ import Image from "next/image";
 export default function SongDisplay({song, votingEnabled}: {song: Song, votingEnabled: boolean}) {
     return (
         <div className="flex flex-col bg-lime-300 p-4 border-4 border-black
-                        justify-start items-center rounded-md gap-y-2 
+                        justify-start items-center rounded-md gap-y-2 h-full
                         max-h-[32rem] md:w-full w-[12rem] overflow-y-auto">
             
             <Image

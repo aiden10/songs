@@ -98,7 +98,7 @@ export default function SongReveal({ song }: SongRevealProps) {
                     <h3 className="text-lg font-semibold text-red-600 mb-2 text-center">
                         ❌ Incorrect Guesses ({incorrectGuessers.length})
                     </h3>
-                    <div className="bg-red-50 rounded-lg p-3">
+                    <div className="bg-amber-50 rounded-md p-3 border-4 border-black">
                         {incorrectGuessers.map((guess, index) => (
                             <div key={`${guess.voter!.playerID}-${index}`} className="py-1 text-sm text-red-700">
                                 <span className="font-medium">{guess.voter!.playerName}</span>

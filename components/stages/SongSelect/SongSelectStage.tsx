@@ -5,7 +5,7 @@ import SongCarousel from "./SongCarousel";
 
 export default function SongSelectStage() {
     return (
-        <div className="flex flex-col h-full gap-4 sm:gap-6 place-items-center">
+        <div className="flex flex-col h-full place-items-center">
             <div className="flex-1 min-h-0 ">
                 <SongCarousel/>
             </div>

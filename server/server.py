@@ -10,6 +10,7 @@ import random
 origins = [
     "http://localhost",
     "http://localhost:3000",
+    "https://songuesser.vercel.app"
 ]
 
 app = FastAPI()

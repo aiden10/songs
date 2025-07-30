@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -21,8 +20,28 @@ export default function SongSearchBar() {
     const [disabled, setDisabled] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [error, setError] = useState<string>('');
+    const [dropdownPosition, setDropdownPosition] = useState<'below' | 'above'>('below');
     
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    // Calculate dropdown position to prevent page overflow
+    useEffect(() => {
+        if (showDropdown && inputRef.current) {
+            const inputRect = inputRef.current.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const dropdownHeight = 240; // max-h-60 = 240px
+            
+            const spaceBelow = viewportHeight - inputRect.bottom;
+            const spaceAbove = inputRect.top;
+            
+            if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+                setDropdownPosition('above');
+            } else {
+                setDropdownPosition('below');
+            }
+        }
+    }, [showDropdown, options]);
 
     useEffect(() => {
         if (!query.trim()) {
@@ -156,6 +175,7 @@ export default function SongSearchBar() {
             {/* Search input */}
             <div className="relative">
                 <input
+                    ref={inputRef}
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -179,9 +199,23 @@ export default function SongSearchBar() {
 
             {/* Dropdown with search results */}
             {showDropdown && !disabled && (
-                <div ref={dropdownRef} className="absolute z-10 w-full max-h-60 overflow-y-auto
-                bg-lime-300 border-4 border-black rounded-lg shadow-lg
-                    scrollbar-thin scrollbar-thumb-lime-300 scrollbar-track-amber-100">
+                <div 
+                    ref={dropdownRef} 
+                    className={`
+                        absolute z-50 w-full overflow-y-auto
+                        bg-lime-300 border-4 border-black rounded-lg shadow-lg
+                        scrollbar-thin scrollbar-thumb-lime-300 scrollbar-track-amber-100
+                        ${dropdownPosition === 'above' 
+                            ? 'bottom-full mb-1 max-h-60' 
+                            : 'top-full mt-1 max-h-[min(240px,calc(100vh-100px))]'
+                        }
+                    `}
+                    style={{
+                        maxHeight: dropdownPosition === 'above' 
+                            ? '240px' 
+                            : `min(240px, calc(100vh - ${inputRef.current?.getBoundingClientRect().bottom || 0}px - 20px))`
+                    }}
+                >
                     {options.map((option, index) => (
                         <button
                             key={`${option.id}-${index}`}

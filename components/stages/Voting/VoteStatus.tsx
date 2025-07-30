@@ -23,7 +23,7 @@ function VoteItem({ vote }: { vote: Vote }) {
     }
     
     return (
-        <div className="flex flex-row items-center p-2 bg-lime-300 rounded-lg shadow-sm border-4">
+        <div className="flex flex-row items-center p-2 bg-lime-300 rounded-lg shadow-sm border-4 ">
             <div className="relative group">
                 <Image
                     src={song.cover}

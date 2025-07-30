@@ -57,7 +57,8 @@ export default function Leaderboard({ title = "Leaderboard", showPositions = tru
                             key={player.playerID}
                             className={`
                                 flex items-center justify-between p-4 transition-all duration-200 hover:shadow-md bg-amber-50
-                                ${isCurrentPlayer ? 'ring-2 ring-lime-300 ring-inset' : ''}
+                                border-4 border-black border-t-0
+                                ${isCurrentPlayer ? 'border-lime-300' : ''}
                                 ${compact ? 'p-3' : 'p-4'}
                             `}
                             >

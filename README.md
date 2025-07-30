@@ -1,34 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# About
+Songuesser is a multiplayer browser game where players pick songs and then vote on who they think picked each song.
 
-## Getting Started
+# Tech Stack
+The front end is made with Next.js, React, TypeScript, Tailwind, and hosted with Vercel. The back end server uses Python, FastAPI, and is hosted on an AWS EC2 instance.
 
-First, run the development server:
+#  Song Selection Screen
+<img width="1920" height="913" alt="image" src="https://github.com/user-attachments/assets/a5bc640d-962f-45be-b5b5-19db5502cc1a" />
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+# Voting Screen
+<img width="1920" height="913" alt="image" src="https://github.com/user-attachments/assets/78ca8123-64a5-4d13-89fc-486149418e9b" />
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Reveal Screen
+<img width="1920" height="913" alt="image" src="https://github.com/user-attachments/assets/9c502413-d52d-422c-9a1a-2339e3b3863e" />
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Results Screen
+<img width="1920" height="913" alt="image" src="https://github.com/user-attachments/assets/f69c378c-7d4c-455a-94d4-2e0e65c57c5a" />
 
-## Learn More
+# Running locally
+To run the front end:
+- `npm install`
+- `npm run dev`
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+To run the game server locally:
+- Update shared/constants.ts urls to localhost 
+- `cd server`
+- `fastapi server.py`
